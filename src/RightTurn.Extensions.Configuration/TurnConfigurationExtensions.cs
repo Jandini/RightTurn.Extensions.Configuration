@@ -27,14 +27,33 @@ namespace RightTurn.Extensions.Configuration
 
 
         /// <summary>
-        /// Bind configuration to a service class and add the service as singleton.
+        /// Bind configuration to a class and add the object as singleton.
         /// </summary>
         /// <typeparam name="TService"></typeparam>
         /// <typeparam name="TImplementation"></typeparam>
         /// <param name="turn"></param>
         /// <param name="key">The key of the configuration section to bind.</param>
         /// <returns></returns>
-        public static ITurn WithConfigurationService<TService, TImplementation>(this ITurn turn, string key) where TService : class where TImplementation : class, TService, new()
+        public static ITurn WithConfigurationSettings<T>(this ITurn turn, string key) where T : class, new()
+        {
+            var settings = new T();
+            var configuration = turn.Directions.Get<IConfiguration>();
+
+            configuration.Bind(key, settings);
+            turn.WithServices(services => services.AddSingleton(settings));
+
+            return turn;
+        }
+
+        /// <summary>
+        /// Bind configuration settings to a service class and add the service as singleton.
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <param name="turn"></param>
+        /// <param name="key">The key of the configuration section to bind.</param>
+        /// <returns></returns>
+        public static ITurn WithConfigurationSettings<TService, TImplementation>(this ITurn turn, string key) where TService : class where TImplementation : class, TService, new()
         {
             var service = new TImplementation();
             var configuration = turn.Directions.Get<IConfiguration>();
@@ -43,6 +62,6 @@ namespace RightTurn.Extensions.Configuration
             turn.WithServices(services => services.AddSingleton<TService>(service));
 
             return turn;
-        }
+        }      
     }
 }
