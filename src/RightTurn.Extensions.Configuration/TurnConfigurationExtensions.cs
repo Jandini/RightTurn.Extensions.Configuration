@@ -6,9 +6,7 @@ using System.IO;
 namespace RightTurn.Extensions.Configuration
 {
     public static class TurnConfigurationExtensions
-    {     
-
-
+    {
         public static ITurn WithConfiguration(this ITurn turn, Func<IConfiguration> builder)
         {
             turn.Directions.Add(builder);
@@ -38,10 +36,10 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<T>(this ITurn turn, string key) where T : class, new()
         {
-            TurnConfiguration.Bindings.Add(key, () =>
+            TurnConfiguration.Bindings.Add(key, (services) =>
             {
                 var settings = new T();
-                turn.WithServices(services => services.AddSingleton(settings));
+                services.AddSingleton(settings);
                 return settings;
             });
 
@@ -58,14 +56,14 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<TService, TImplementation>(this ITurn turn, string key) where TService : class where TImplementation : class, TService, new()
         {
-            TurnConfiguration.Bindings.Add(key, () =>
+            TurnConfiguration.Bindings.Add(key, (services) =>
             {
                 var service = new TImplementation();
-                turn.WithServices(services => services.AddSingleton<TService>(service));
+                services.AddSingleton<TService>(service);
                 return service;
             });
-            
+
             return turn;
-        }      
+        }
     }
 }
