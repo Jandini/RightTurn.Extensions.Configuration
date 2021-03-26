@@ -7,6 +7,12 @@ namespace RightTurn.Extensions.Configuration
 {
     public static class TurnConfigurationExtensions
     {
+        public static ITurn WithServices(this ITurn turn, Action<IConfiguration, IServiceCollection> services)
+        {
+            turn.Directions.Add<ITurnServices>(new TurnServices(services));            
+            return turn;
+        }
+
         public static ITurn WithConfiguration(this ITurn turn, Func<IConfiguration> builder)
         {
             turn.Directions.Add(builder);
@@ -16,7 +22,7 @@ namespace RightTurn.Extensions.Configuration
 
         public static ITurn WithConfiguration(this ITurn turn, Func<IConfigurationBuilder, IConfigurationBuilder> builder) => turn.WithConfiguration(() =>
         {
-            return builder
+            return builder                
                 .Invoke(new ConfigurationBuilder())
                 .Build();
         });
