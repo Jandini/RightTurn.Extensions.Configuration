@@ -41,10 +41,7 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<T>(this ITurn turn, string key) where T : class, new()
         {
-            if (!turn.Directions.Have(out TurnConfigurationBindings bindings))
-                bindings = new TurnConfigurationBindings();
-
-            bindings.Add(key, (services) =>
+            turn.Directions.Add<TurnConfigurationBindings>().Add(key, (services) =>
             {
                 var settings = new T();
                 services.AddSingleton(settings);
@@ -64,10 +61,7 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<TService, TImplementation>(this ITurn turn, string key) where TService : class where TImplementation : class, TService, new()
         {
-            if (!turn.Directions.Have(out TurnConfigurationBindings bindings))
-                bindings = new TurnConfigurationBindings();
-
-            bindings.Add(key, (services) =>
+            turn.Directions.Add<TurnConfigurationBindings>().Add(key, (services) =>
             {
                 var service = new TImplementation();
                 services.AddSingleton<TService>(service);
