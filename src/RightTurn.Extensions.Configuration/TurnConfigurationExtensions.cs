@@ -9,20 +9,19 @@ namespace RightTurn.Extensions.Configuration
     {
         public static ITurn WithServices(this ITurn turn, Action<IConfiguration, IServiceCollection> services)
         {
-            turn.Directions.Add<ITurnServices>(new TurnServices(services));            
+            turn.Directions.Add<ITurnServices>(new TurnServices(services));
             return turn;
         }
 
         public static ITurn WithConfiguration(this ITurn turn, Func<IConfiguration> builder)
         {
-            turn.Directions.Add(builder);
-            turn.Directions.Add<ITurnConfiguration>(new TurnConfiguration());
+            turn.Directions.Add<ITurnConfiguration>(new TurnConfiguration(builder));
             return turn;
         }
 
         public static ITurn WithConfiguration(this ITurn turn, Func<IConfigurationBuilder, IConfigurationBuilder> builder) => turn.WithConfiguration(() =>
         {
-            return builder                
+            return builder
                 .Invoke(new ConfigurationBuilder())
                 .Build();
         });
@@ -42,7 +41,10 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<T>(this ITurn turn, string key) where T : class, new()
         {
-            TurnConfiguration.Bindings.Add(key, (services) =>
+            if (!turn.Directions.Have(out TurnConfigurationBindings bindings))
+                bindings = new TurnConfigurationBindings();
+
+            bindings.Add(key, (services) =>
             {
                 var settings = new T();
                 services.AddSingleton(settings);
@@ -62,7 +64,10 @@ namespace RightTurn.Extensions.Configuration
         /// <returns></returns>
         public static ITurn WithConfigurationSettings<TService, TImplementation>(this ITurn turn, string key) where TService : class where TImplementation : class, TService, new()
         {
-            TurnConfiguration.Bindings.Add(key, (services) =>
+            if (!turn.Directions.Have(out TurnConfigurationBindings bindings))
+                bindings = new TurnConfigurationBindings();
+
+            bindings.Add(key, (services) =>
             {
                 var service = new TImplementation();
                 services.AddSingleton<TService>(service);

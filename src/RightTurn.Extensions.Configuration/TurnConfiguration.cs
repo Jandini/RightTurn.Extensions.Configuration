@@ -1,27 +1,28 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 
 namespace RightTurn.Extensions.Configuration
 {
     internal class TurnConfiguration : ITurnConfiguration
     {
-        public static Dictionary<string, Func<IServiceCollection, object>> Bindings = new Dictionary<string, Func<IServiceCollection, object>>();
+        readonly Func<IConfiguration> _builder;
+
+        public TurnConfiguration(Func<IConfiguration> builder)
+        {
+            _builder = builder;
+        }
 
         public void AddConfiguration(ITurn turn)
         {
-            if (turn.Directions.Have<Func<IConfiguration>>(out var configurationBuilder))
-            {
-                var configuration = configurationBuilder.Invoke();
-                turn.Directions.Add(configuration);
+            var configuration = _builder.Invoke();
+            turn.Directions.Add(configuration);
 
-                if (Bindings.Count > 0)
-                {
-                    var services = turn.Directions.ServiceCollection();
-                    foreach (var bind in Bindings)
-                        configuration.Bind(bind.Key, bind.Value.Invoke(services));
-                }
+            if (turn.Directions.Have<TurnConfigurationBindings>(out var bindings)
+                && bindings.Count > 0)
+            {
+                var services = turn.Directions.ServiceCollection();
+                foreach (var binding in bindings)
+                    configuration.Bind(binding.Key, binding.Value.Invoke(services));
             }
         }
     }
