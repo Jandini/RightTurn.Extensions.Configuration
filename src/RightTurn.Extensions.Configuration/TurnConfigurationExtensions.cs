@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
 
 namespace RightTurn.Extensions.Configuration
 {
@@ -26,8 +25,7 @@ namespace RightTurn.Extensions.Configuration
                 .Build();
         });
 
-        public static ITurn WithConfigurationFile(this ITurn turn, string name = "appsettings.json", bool optional = true) => WithConfiguration(turn, (builder) => builder
-            .SetBasePath(Directory.GetCurrentDirectory())
+        public static ITurn WithConfigurationFile(this ITurn turn, string name = "appsettings.json", bool optional = true) => WithConfiguration(turn, (builder) => builder            
             .AddJsonFile(name, optional));
 
 
